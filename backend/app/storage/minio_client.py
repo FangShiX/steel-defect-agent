@@ -12,6 +12,16 @@ from app.config.settings import settings
 logger = logging.getLogger(__name__)
 
 
+def object_key_from_url(value: str) -> str | None:
+    from urllib.parse import unquote, urlparse
+
+    path = unquote(urlparse(value).path).lstrip("/")
+    if path.startswith("api/storage/"):
+        path = path[len("api/storage/"):]
+    bucket, separator, key = path.partition("/")
+    return key if separator and bucket == settings.MINIO_BUCKET else None
+
+
 class MinIOClient:
     """MinIO 客户端封装"""
 
@@ -74,13 +84,16 @@ class MinIOClient:
 
     def get_presigned_url(self, object_name: str, expires_seconds: int = 15 * 60) -> str:
         """获取对象的预签名访问 URL（默认有效期 15 分钟）"""
-        from datetime import timedelta
-        url = self.client.presigned_get_object(
-            bucket_name=self.bucket_name,
-            object_name=object_name,
-            expires=timedelta(seconds=expires_seconds),
-        )
-        return url
+        from datetime import datetime, timedelta, timezone
+        from urllib.parse import quote
+        import jwt
+
+        # Keep the storage service private. A scoped, short-lived URL is served
+        # by the authenticated application's gateway, not an internal hostname.
+        token = jwt.encode({"aud": "storage", "bucket": self.bucket_name, "object": object_name,
+                            "exp": datetime.now(timezone.utc) + timedelta(seconds=expires_seconds)},
+                           settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+        return f"/api/storage/{quote(self.bucket_name, safe='')}/{quote(object_name, safe='/')}?token={token}"
 
     def delete_file(self, object_name: str):
         """删除 MinIO 中的文件"""
@@ -98,10 +111,7 @@ class MinIOClient:
         if not url:
             return
         try:
-            from urllib.parse import urlparse
-            path = urlparse(url).path.lstrip("/")
-            # path 形如 "{bucket_name}/{object_name...}"
-            object_name = path.split("/", 1)[1] if "/" in path else None
+            object_name = object_key_from_url(url)
             if object_name:
                 self.delete_file(object_name)
         except Exception:

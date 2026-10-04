@@ -31,6 +31,8 @@ body = (f'--{boundary}\r\nContent-Disposition: form-data; name="file"; filename=
 item = call('/api/files', 'POST', body, token, 'multipart/form-data; boundary=' + boundary)
 path = '/api/files/' + str(item['id'])
 assert item['status'] == 'active'
+with urlopen(args.base_url + item['download_url'], timeout=30) as download:
+    assert download.read() == b'release smoke'
 assert call(path + '/archive', 'POST', token=token)['status'] == 'archived'
 assert call(path + '/restore', 'POST', token=token)['status'] == 'active'
 assert call(path, 'DELETE', token=token)['status'] == 'deleted'

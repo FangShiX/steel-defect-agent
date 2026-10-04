@@ -28,6 +28,7 @@ from app.api.scenes import router as scenes_router
 from app.api.training import router as training_router
 from app.api.cleanup import router as cleanup_router
 from app.api.files import router as files_router
+from app.api.storage import router as storage_router
 from app.config.settings import settings
 from app.core.exceptions import register_exception_handlers
 from app.core.logger import get_logger, setup_logging
@@ -155,6 +156,7 @@ app.include_router(notifications_router)
 app.include_router(undo_router)
 app.include_router(cleanup_router)
 app.include_router(files_router)
+app.include_router(storage_router)
 
 
 @app.get("/")

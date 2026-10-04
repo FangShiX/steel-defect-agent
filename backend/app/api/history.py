@@ -42,11 +42,8 @@ def _legacy_object_key(value: str | None) -> str | None:
     """Extract an object key from a legacy persisted MinIO URL, if possible."""
     if not value:
         return None
-    parsed = urlparse(value)
-    parts = parsed.path.lstrip("/").split("/", 1)
-    if len(parts) == 2 and parts[0] == settings.MINIO_BUCKET and parts[1]:
-        return parts[1]
-    return None
+    from app.storage.minio_client import object_key_from_url
+    return object_key_from_url(value)
 
 
 def _result_to_response(result, minio: MinIOClient) -> DetectionResultResponse:
