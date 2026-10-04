@@ -1,0 +1,2 @@
+# Use docker-compose.yml for local development or docker-compose.prod.yml for production.
+# Generate secrets first: python scripts/configure.py

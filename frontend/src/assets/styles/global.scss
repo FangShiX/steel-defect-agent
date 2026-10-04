@@ -1,0 +1,410 @@
+// ═══════════════════════════════════════════════════════
+// 全局样式 — 通用类名、布局辅助
+// ═══════════════════════════════════════════════════════
+
+@use './reset.scss';
+
+:root {
+  --app-bg: #fcfcfc;
+  --app-surface: #ffffff;
+  --app-sidebar-bg: #fcfcfc;
+  --app-text: #0d0d0d;
+  --app-muted: #667085;
+  --app-border: rgba(0, 0, 0, 0.08);
+  --app-hover: rgba(0, 0, 0, 0.04);
+  --app-active: rgba(0, 0, 0, 0.06);
+  --app-subtle: #f7f9fc;
+  --app-shadow: 0 8px 24px rgba(28, 39, 60, 0.05);
+  --app-content-max: 1440px;
+  --app-radius-sm: 6px;
+  --app-radius: 10px;
+  --app-radius-lg: 14px;
+
+  --el-border-radius-base: var(--app-radius-sm);
+  --el-border-radius-small: 4px;
+  --el-font-size-base: 14px;
+
+  --settings-bg: #ffffff;
+  --settings-text: #171717;
+  --settings-muted: #8b8f98;
+  --settings-border: #ececf0;
+  --settings-hover: rgba(0, 0, 0, 0.05);
+  --settings-active: rgba(0, 0, 0, 0.06);
+}
+
+:root[data-theme='dark'] {
+  --app-bg: #151515;
+  --app-surface: #1f1f1f;
+  --app-sidebar-bg: #111111;
+  --app-text: #f3f4f6;
+  --app-muted: #a1a1aa;
+  --app-border: rgba(255, 255, 255, 0.12);
+  --app-hover: rgba(255, 255, 255, 0.08);
+  --app-active: rgba(255, 255, 255, 0.12);
+  --app-subtle: #262626;
+  --app-shadow: 0 14px 36px rgba(0, 0, 0, 0.32);
+
+  --settings-bg: #202020;
+  --settings-text: #f4f4f5;
+  --settings-muted: #a1a1aa;
+  --settings-border: rgba(255, 255, 255, 0.12);
+  --settings-hover: rgba(255, 255, 255, 0.08);
+  --settings-active: rgba(255, 255, 255, 0.12);
+}
+
+body {
+  background: var(--app-bg);
+  color: var(--app-text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+// Keep keyboard navigation visible without changing mouse focus presentation.
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--el-color-primary);
+  outline-offset: 2px;
+}
+
+.el-table {
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .page-container {
+    padding: $spacing-md;
+  }
+
+  .el-dialog {
+    width: calc(100vw - 24px) !important;
+    max-width: calc(100vw - 24px);
+  }
+
+  .el-table {
+    overflow-x: auto;
+  }
+}
+
+.el-button {
+  font-weight: 500;
+}
+
+.el-input__wrapper,
+.el-select__wrapper,
+.el-textarea__inner {
+  border-radius: var(--app-radius-sm);
+}
+
+:root[data-theme='dark'] {
+  .frontend-b-page,
+  .training-page {
+    color: var(--app-text);
+  }
+
+  .control-card,
+  .workspace-card,
+  .history-card,
+  .filter-bar,
+  .stat-card,
+  .chart-panel,
+  .result-panel,
+  .section-card.el-card {
+    background: var(--app-surface) !important;
+    border-color: var(--app-border) !important;
+    box-shadow: var(--app-shadow) !important;
+    color: var(--app-text);
+  }
+
+  .el-drawer,
+  .el-drawer__body {
+    background: var(--app-surface) !important;
+    color: var(--app-text);
+  }
+
+  .el-drawer__header {
+    margin-bottom: 0;
+    border-bottom: 1px solid var(--app-border);
+    color: var(--app-text);
+  }
+
+  .module-header h1,
+  .page-header h2,
+  .section-title h3,
+  .result-panel__heading h3,
+  .chart-panel__heading h3,
+  .card-title,
+  .subsection-title,
+  .filter-bar__title,
+  .stat-card__body strong,
+  .metric-value,
+  .camera-metrics strong,
+  .video-progress-card__header strong,
+  .result-summary strong,
+  .el-card__header,
+  .el-table {
+    color: var(--app-text) !important;
+  }
+
+  .module-header p,
+  .page-header p,
+  .section-title p,
+  .result-panel__heading p,
+  .chart-panel__heading p,
+  .card-caption,
+  .form-hint,
+  .updated-at,
+  .filter-hint,
+  .stat-card__body span,
+  .stat-card__body p,
+  .metric-label,
+  .camera-metrics span,
+  .video-progress-card p,
+  .video-progress-card__header span,
+  .result-summary span,
+  .el-empty__description,
+  .el-upload__tip {
+    color: var(--app-muted) !important;
+  }
+
+  .el-card,
+  .el-descriptions,
+  .el-descriptions__body,
+  .el-descriptions__table,
+  .el-descriptions__cell,
+  .el-table,
+  .el-table tr,
+  .el-table th.el-table__cell,
+  .el-table td.el-table__cell,
+  .el-table__expanded-cell,
+  .el-table__body tr.hover-row > td.el-table__cell,
+  .el-table__body tr.current-row > td.el-table__cell {
+    background: var(--app-surface) !important;
+    color: var(--app-text);
+  }
+
+  .el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell,
+  .el-table__body tr:hover > td.el-table__cell,
+  .el-table th.el-table__cell {
+    background: var(--app-subtle) !important;
+  }
+
+  .el-table,
+  .el-table__inner-wrapper::before,
+  .el-table td.el-table__cell,
+  .el-table th.el-table__cell,
+  .el-card__header {
+    border-color: var(--app-border) !important;
+  }
+
+  .el-descriptions__label,
+  .el-descriptions__content {
+    background: var(--app-surface) !important;
+    border-color: var(--app-border) !important;
+  }
+
+  .el-descriptions__label {
+    background: var(--app-subtle) !important;
+  }
+
+  .el-input__wrapper,
+  .el-select__wrapper,
+  .el-textarea__inner,
+  .el-input-number__decrease,
+  .el-input-number__increase {
+    background: var(--app-subtle) !important;
+    box-shadow: 0 0 0 1px var(--app-border) inset !important;
+  }
+
+  .el-input__inner,
+  .el-select__placeholder,
+  .el-select__selected-item,
+  .el-textarea__inner,
+  .el-form-item__label,
+  .el-radio__label,
+  .el-descriptions__label,
+  .el-descriptions__content {
+    color: var(--app-text) !important;
+  }
+
+  .el-button:not(.el-button--primary):not(.el-button--success):not(.el-button--danger):not(.el-button--warning) {
+    background: var(--app-surface);
+    border-color: var(--app-border);
+    color: var(--app-text);
+  }
+
+  .el-tabs__item {
+    color: var(--app-muted);
+
+    &.is-active {
+      color: #80a7ff;
+    }
+  }
+
+  .el-tabs__nav-wrap::after,
+  .el-divider__text {
+    background: var(--app-surface);
+  }
+
+  .el-upload-dragger,
+  .result-panel__canvas,
+  .metric-item,
+  .camera-metrics div,
+  .batch-image-card,
+  .key-frame-grid figure,
+  .annotated-image {
+    background: var(--app-subtle) !important;
+    border-color: var(--app-border) !important;
+  }
+
+  .el-popper.is-light,
+  .el-popover.el-popper,
+  .el-select__popper.el-popper,
+  .el-dropdown__popper.el-popper {
+    background: var(--app-surface) !important;
+    border-color: var(--app-border) !important;
+    color: var(--app-text) !important;
+  }
+
+  .el-popper.is-light .el-popper__arrow::before,
+  .el-popover.el-popper .el-popper__arrow::before {
+    background: var(--app-surface) !important;
+    border-color: var(--app-border) !important;
+  }
+
+  .el-select-dropdown__item {
+    color: var(--app-text);
+
+    &.is-hovering,
+    &:hover {
+      background: var(--app-hover);
+    }
+  }
+
+  .settings-dialog {
+    .el-input__wrapper,
+    .el-select__wrapper {
+      background: #2a2a2a;
+      box-shadow: 0 0 0 1px var(--settings-border) inset;
+    }
+
+    .el-input__inner,
+    .el-select__placeholder,
+    .el-select__selected-item {
+      color: var(--settings-text);
+    }
+
+    .el-button:not(.el-button--primary) {
+      background: transparent;
+      border-color: var(--settings-border);
+      color: var(--settings-text);
+    }
+  }
+
+  .settings-select-popper {
+    background: #2a2a2a !important;
+    border-color: var(--settings-border) !important;
+
+    .el-select-dropdown__item {
+      color: var(--settings-text);
+
+      &.is-hovering,
+      &:hover {
+        background: var(--settings-hover);
+      }
+
+      &.is-selected {
+        color: #9ca3ff;
+      }
+    }
+
+    .el-popper__arrow::before {
+      background: #2a2a2a !important;
+      border-color: var(--settings-border) !important;
+    }
+  }
+}
+
+.settings-select-popper {
+  z-index: 5001 !important;
+}
+
+// ── 页面容器 ────────────────────────────────────────
+.page-container {
+  padding: $spacing-lg;
+  min-height: calc(100vh - $header-height);
+}
+
+// ── 卡片容器 ────────────────────────────────────────
+.card-container {
+  background: var(--app-surface);
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-sm;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+}
+
+// ── Flex 布局辅助 ───────────────────────────────────
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// ── 文本截断 ────────────────────────────────────────
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// ── 统一刷新/操作按钮 (与数据看板一致) ──────────────
+.period-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: var(--app-surface);
+  color: var(--app-text);
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+
+  &:hover { border-color: var(--app-muted); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.period-val {
+  font-weight: 500;
+}
+
+.refresh-btn {
+  .spin {
+    animation: dash-spin 1s linear infinite;
+  }
+}
+
+@keyframes dash-spin {
+  to { transform: rotate(360deg); }
+}
+
+// ── 滚动条美化 ──────────────────────────────────────
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c0c4cc;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}

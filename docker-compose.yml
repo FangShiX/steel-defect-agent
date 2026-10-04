@@ -1,0 +1,118 @@
+name: steel-defect-agent
+services:
+  postgres:
+    image: pgvector/pgvector:pg15
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?configure first}
+      POSTGRES_USER: ${POSTGRES_USER:?configure first}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?configure first}
+    volumes:
+    - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+    - redis_data:/data
+    healthcheck:
+      test:
+      - CMD
+      - redis-cli
+      - ping
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  minio:
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?configure first}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?configure first}
+    volumes:
+    - minio_data:/data
+    command: server /data --console-address :9001
+    healthcheck:
+      test:
+      - CMD
+      - mc
+      - ready
+      - local
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      DB_HOST: postgres
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_HOST: redis
+      MINIO_ENDPOINT: minio:9000
+      MINIO_SECURE: 'false'
+      DATASET_BASE_DIR: /app/datasets
+      TRAIN_OUTPUT_DIR: /app/runs/train
+      DEBUG: 'true'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    command:
+    - sh
+    - -c
+    - alembic upgrade head && python -m app.database.seed && exec uvicorn main:app
+      --host 0.0.0.0 --port 8000 --no-access-log
+    volumes:
+    - backend_runs:/app/runs
+    - backend_models:/app/models
+    - backend_datasets:/app/datasets
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import json,urllib.request; r=json.load(urllib.request.urlopen('http://127.0.0.1:8000/api/health/detail',timeout=5));
+        assert r['data']['status']=='healthy'
+      interval: 15s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
+    env_file: .env
+    ports:
+    - 127.0.0.1:8000:8000
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - wget -q -O /dev/null http://127.0.0.1/ || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    ports:
+    - 127.0.0.1:${APP_PORT:-8080}:80
+networks:
+  default:
+    name: ssdd-network
+volumes:
+  postgres_data: {}
+  redis_data: {}
+  minio_data: {}
+  backend_runs: {}
+  backend_models: {}
+  backend_datasets: {}
