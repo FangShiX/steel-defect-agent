@@ -22,7 +22,8 @@ python-pptx==1.0.2
 alembic==1.20.0
 redis==8.1.0
 minio==7.2.20
-python-jose[cryptography]==3.5.0
+PyJWT[crypto]==2.15.1
+setuptools==84.0.0
 bcrypt==5.0.0
 pydantic==2.13.5
 pydantic-settings==2.15.0

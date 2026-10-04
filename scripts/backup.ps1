@@ -26,7 +26,7 @@ docker compose @composeArgs exec -T postgres pg_dump -U $env:POSTGRES_USER -d $e
 if ($LASTEXITCODE -ne 0) { throw "PostgreSQL backup failed." }
 
 $mount = "$resolvedBackupDir`:/backup"
-docker run --rm --network ssdd-network -v $mount --entrypoint /bin/sh minio/mc -c "mc alias set local http://minio:9000 `"$env:MINIO_ACCESS_KEY`" `"$env:MINIO_SECRET_KEY`"; mc mirror --overwrite local/ssdd-images /backup/minio"
+docker run --rm --network ssdd-network -v $mount --entrypoint /bin/sh steel-defect-agent-minio:2025-10-15 -c "mc alias set local http://minio:9000 `"$env:MINIO_ACCESS_KEY`" `"$env:MINIO_SECRET_KEY`"; mc mirror --overwrite local/ssdd-images /backup/minio"
 if ($LASTEXITCODE -ne 0) { throw "MinIO backup failed." }
 
 $services = @(docker compose @composeArgs config --services)

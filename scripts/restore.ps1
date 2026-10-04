@@ -26,7 +26,7 @@ Get-Content -Raw $databaseFile | docker compose @composeArgs exec -T postgres ps
 if ($LASTEXITCODE -ne 0) { throw "PostgreSQL restore failed." }
 
 $mount = "$resolvedBackupDir`:/backup"
-docker run --rm --network ssdd-network -v $mount --entrypoint /bin/sh minio/mc -c "mc alias set local http://minio:9000 `"$env:MINIO_ACCESS_KEY`" `"$env:MINIO_SECRET_KEY`"; mc mirror --overwrite --remove /backup/minio local/ssdd-images"
+docker run --rm --network ssdd-network -v $mount --entrypoint /bin/sh steel-defect-agent-minio:2025-10-15 -c "mc alias set local http://minio:9000 `"$env:MINIO_ACCESS_KEY`" `"$env:MINIO_SECRET_KEY`"; mc mirror --overwrite --remove /backup/minio local/ssdd-images"
 if ($LASTEXITCODE -ne 0) { throw "MinIO restore failed." }
 
 $runsBackupDir = Join-Path $resolvedBackupDir "runs"

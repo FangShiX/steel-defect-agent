@@ -20,7 +20,7 @@ from fastapi import (
     WebSocketDisconnect,
 )
 from fastapi.concurrency import run_in_threadpool
-from jose import JWTError
+from jwt import InvalidTokenError as JWTError
 from sqlalchemy.orm import Session
 
 from app.api.auth import get_current_user
