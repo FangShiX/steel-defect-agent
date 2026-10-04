@@ -7,6 +7,9 @@ from urllib.parse import urlparse
 
 def configure(output: Path, production: bool, origin: str) -> None:
     parsed = urlparse(origin)
+    if any(character in origin for character in '\r\n') or parsed.path not in {'', '/'} or parsed.query or parsed.fragment or parsed.username:
+        raise ValueError("Use an origin without credentials, path, query or line breaks")
+    origin = origin.rstrip('/')
     if production and (parsed.scheme != "https" or not parsed.netloc or parsed.hostname in {"localhost", "127.0.0.1"}):
         raise ValueError("Production requires an explicit HTTPS origin")
     db_password = secrets.token_urlsafe(32)

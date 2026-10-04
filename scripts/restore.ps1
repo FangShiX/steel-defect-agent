@@ -20,10 +20,18 @@ $manifest = Join-Path $resolvedBackupDir "manifest.json"
 if (-not (Test-Path $manifest)) { throw "Backup manifest not found: $manifest" }
 $metadata = Get-Content $manifest -Raw | ConvertFrom-Json
 $databaseFile = Join-Path $resolvedBackupDir $metadata.database
+$resolvedDatabaseFile = [IO.Path]::GetFullPath($databaseFile)
+if (-not $resolvedDatabaseFile.StartsWith($resolvedBackupDir.TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
+  throw "Database dump must stay inside the backup directory."
+}
 if (-not (Test-Path $databaseFile)) { throw "Database dump not found: $databaseFile" }
 
-Get-Content -Raw $databaseFile | docker compose @composeArgs exec -T postgres psql -U $env:POSTGRES_USER -d $env:POSTGRES_DB -v ON_ERROR_STOP=1
+$containerDump = "/tmp/ssdd-restore-$([Guid]::NewGuid().ToString('N')).sql"
+docker compose @composeArgs cp $databaseFile "postgres:$containerDump"
+if ($LASTEXITCODE -ne 0) { throw "PostgreSQL restore copy failed." }
+docker compose @composeArgs exec -T postgres psql -U $env:POSTGRES_USER -d $env:POSTGRES_DB -v ON_ERROR_STOP=1 -f $containerDump
 if ($LASTEXITCODE -ne 0) { throw "PostgreSQL restore failed." }
+docker compose @composeArgs exec -T postgres rm -- $containerDump
 
 $mount = "$resolvedBackupDir`:/backup"
 docker run --rm --network ssdd-network -v $mount --entrypoint /bin/sh steel-defect-agent-minio:2025-10-15 -c "mc alias set local http://minio:9000 `"$env:MINIO_ACCESS_KEY`" `"$env:MINIO_SECRET_KEY`"; mc mirror --overwrite --remove /backup/minio local/ssdd-images"

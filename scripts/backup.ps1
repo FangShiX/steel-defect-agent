@@ -22,8 +22,12 @@ if (-not $env:MINIO_ACCESS_KEY -or -not $env:MINIO_SECRET_KEY) {
 
 $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $databaseFile = Join-Path $resolvedBackupDir "postgres-$timestamp.sql"
-docker compose @composeArgs exec -T postgres pg_dump -U $env:POSTGRES_USER -d $env:POSTGRES_DB --clean --if-exists | Set-Content -NoNewline -Encoding utf8 $databaseFile
+$containerDump = "/tmp/ssdd-backup-$timestamp.sql"
+docker compose @composeArgs exec -T postgres pg_dump -U $env:POSTGRES_USER -d $env:POSTGRES_DB --clean --if-exists -f $containerDump
 if ($LASTEXITCODE -ne 0) { throw "PostgreSQL backup failed." }
+docker compose @composeArgs cp "postgres:$containerDump" $databaseFile
+if ($LASTEXITCODE -ne 0) { throw "PostgreSQL backup copy failed." }
+docker compose @composeArgs exec -T postgres rm -- $containerDump
 
 $mount = "$resolvedBackupDir`:/backup"
 docker run --rm --network ssdd-network -v $mount --entrypoint /bin/sh steel-defect-agent-minio:2025-10-15 -c "mc alias set local http://minio:9000 `"$env:MINIO_ACCESS_KEY`" `"$env:MINIO_SECRET_KEY`"; mc mirror --overwrite local/ssdd-images /backup/minio"

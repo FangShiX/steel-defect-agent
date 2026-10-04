@@ -115,7 +115,7 @@ def seed_admin_user(db, roles: dict[str, Role]) -> User:
     admin = db.query(User).filter(User.username == "admin").first()
     if not admin:
         password = settings.BOOTSTRAP_ADMIN_PASSWORD
-        if len(password) < 12:
+        if len(password) < 12 or password.startswith("REPLACE_"):
             raise ValueError("Set BOOTSTRAP_ADMIN_PASSWORD to a unique password of at least 12 characters before initial seeding")
         admin = User(
             username="admin",
